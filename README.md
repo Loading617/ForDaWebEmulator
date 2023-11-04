@@ -1,2 +1,2 @@
 # ForDaWeb Emulator
-Web-based Emulator
+A Emulator For The Web
