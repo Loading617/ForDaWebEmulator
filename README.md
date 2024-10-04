@@ -1,2 +1,2 @@
 # ForDaWeb Emulator
-A Emulator For The Web focused on GameCube, PS2, PS3, DreamCast, Saturn & CD
+A Emulator Web App focused on GameCube, PS2, PS3, DreamCast, Saturn & CD
