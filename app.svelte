@@ -3,10 +3,12 @@
     import EmulatorCanvas from "./EmulatorCanvas.svelte";
     import FileUploader from "./FileUploader.svelte";
     import ControlPanel from "./ControlPanel.svelte";
+    import ControlSettings from "./ControlSettings.svelte";
  
     let emulator: any;
     let saveStateData: Uint8Array | null = null;
- 
+    let controls = { ...defaultControls };
+
     const initializeEmulator = (romData: ArrayBuffer) => {
        emulator.loadROM(romData);
     };
@@ -30,18 +32,52 @@
     const startEmulator = () => emulator?.start();
     const pauseEmulator = () => emulator?.pause();
     const resetEmulator = () => emulator?.reset();
+ 
+    // Save controls to localStorage
+    const saveControls = () => {
+       localStorage.setItem("controls", JSON.stringify(controls));
+    };
+ 
+    // Load controls from localStorage
+    const loadControls = () => {
+       const savedControls = localStorage.getItem("controls");
+       if (savedControls) {
+          controls = JSON.parse(savedControls);
+       }
+    };
+ 
+    // Apply updated controls
+    const updateControls = (updatedControls: typeof controls) => {
+       controls = { ...updatedControls };
+       saveControls();
+    };
+ 
+    onMount(() => {
+       loadControls();
+    });
+ 
+    // Handle key input during gameplay
+    const handleKeyPress = (event: KeyboardEvent) => {
+       const action = Object.keys(controls).find((key) => controls[key] === event.code);
+       if (action && emulator) {
+          emulator.handleAction(action); // Map action to emulator method
+       }
+    };
+ 
+    window.addEventListener("keydown", handleKeyPress);
  </script>
  
  <main>
     <h1>ForDaWebEmulator</h1>
     <FileUploader on:load={(event) => initializeEmulator(event.detail)} />
     <EmulatorCanvas {emulator} />
-    <ControlPanel
-       onStart={startEmulator}
-       onPause={pauseEmulator}
-       onReset={resetEmulator}
-       onSaveState={saveState}
-       onLoadState={loadState}
-    />
+    <ControlPanel 
+    onStart={startEmulator}
+    onPause={pauseEmulator}
+    onReset={resetEmulator}
+    onSaveState={saveState}
+    onLoadState={loadState}/>
+    <h2>Control Settings</h2>
+    <ControlSettings {controls} onChange={updateControls} />
  </main>
  
