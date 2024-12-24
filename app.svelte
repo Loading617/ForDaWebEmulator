@@ -4,7 +4,7 @@
     import FileUploader from "./FileUploader.svelte";
     import ControlPanel from "./ControlPanel.svelte";
     import ControlSettings from "./ControlSettings.svelte";
-    import Cheats Managerimport Cheatmanager from "./cheatmanager.svelte";
+    import Cheats Manager from "./cheatmanager.svelte";
  
     let emulator: any;
     let saveStateData: Uint8Array | null = null;
