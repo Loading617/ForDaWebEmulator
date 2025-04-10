@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { v4 as uuidv4 } from "uuid"; // Install uuid package: npm install uuid
+    import { v4 as uuidv4 } from "uuid";
     export let cheats: CheatCode[];
     export let onAddCheat: (cheat: CheatCode) => void;
     export let onToggleCheat: (id: string, enabled: boolean) => void;
