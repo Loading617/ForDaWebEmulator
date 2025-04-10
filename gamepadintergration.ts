@@ -8,11 +8,11 @@ window.addEventListener("gamepadconnected", (event) => {
        const buttons = gamepads[0].buttons;
        buttons.forEach((button, index) => {
           if (button.pressed) {
-             emulator.handleGamepadInput(index); // Map to emulator action
+             emulator.handleGamepadInput(index);
           }
        });
     }
  };
  
- setInterval(handleGamepadInput, 16); // Poll gamepad state
+ setInterval(handleGamepadInput, 16);
  
