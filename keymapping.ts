@@ -1,4 +1,3 @@
-// Default key mappings
 const defaultControls = {
     UP: "ArrowUp",
     DOWN: "ArrowDown",
