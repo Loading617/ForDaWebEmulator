@@ -5,11 +5,13 @@
     import ControlPanel from "./ControlPanel.svelte";
     import ControlSettings from "./ControlSettings.svelte";
     import Cheats Manager from "./cheatmanager.svelte";
- 
+
     let emulator: any;
     let saveStateData: Uint8Array | null = null;
     let controls = { ...defaultControls };
     let cheats: CheatCode[] = [];
+    let currentRomName = "";
+    let currentRomData: ArrayBuffer | null = null;
 
     const initializeEmulator = (romData: ArrayBuffer) => {
        emulator.loadROM(romData);
@@ -35,12 +37,10 @@
     const pauseEmulator = () => emulator?.pause();
     const resetEmulator = () => emulator?.reset();
  
-    // Save controls to localStorage
     const saveControls = () => {
        localStorage.setItem("controls", JSON.stringify(controls));
     };
  
-    // Load controls from localStorage
     const loadControls = () => {
        const savedControls = localStorage.getItem("controls");
        if (savedControls) {
@@ -48,7 +48,6 @@
        }
     };
  
-    // Apply updated controls
     const updateControls = (updatedControls: typeof controls) => {
        controls = { ...updatedControls };
        saveControls();
@@ -58,11 +57,10 @@
        loadControls();
     });
  
-    // Handle key input during gameplay
     const handleKeyPress = (event: KeyboardEvent) => {
        const action = Object.keys(controls).find((key) => controls[key] === event.code);
        if (action && emulator) {
-          emulator.handleAction(action); // Map action to emulator method
+          emulator.handleAction(action);
        }
     };
  
@@ -71,7 +69,7 @@
     const addCheat = (cheat: CheatCode) => {
       cheats = [...cheats, cheat];
       if (emulator) {
-         emulator.addCheat(cheat.code, cheat.enabled); // Emulator integration
+         emulator.addCheat(cheat.code, cheat.enabled);
       }
    };
 
@@ -81,16 +79,68 @@
       );
       const cheat = cheats.find((cheat) => cheat.id === id);
       if (cheat && emulator) {
-         emulator.toggleCheat(cheat.code, enabled); // Emulator integration
+         emulator.toggleCheat(cheat.code, enabled);
       }
    };
 
    const removeCheat = (id: string) => {
       const cheat = cheats.find((cheat) => cheat.id === id);
       if (cheat && emulator) {
-         emulator.removeCheat(cheat.code); // Emulator integration
+         emulator.removeCheat(cheat.code);
       }
       cheats = cheats.filter((cheat) => cheat.id !== id);
+   };
+   const saveResumeState = () => {
+      if (!emulator || !currentRomData) {
+         alert("No game running to save state.");
+         return;
+      }
+
+      const emulatorState = emulator.saveState();
+      const resumeState: ResumeState = {
+         romName: currentRomName,
+         romData: currentRomData,
+         emulatorState,
+         cheats,
+         controls,
+      };
+
+      localStorage.setItem("resumeState", JSON.stringify(resumeState));
+      alert("Resume state saved successfully!");
+   };
+
+   const loadResumeState = () => {
+      const savedState = localStorage.getItem("resumeState");
+      if (!savedState) {
+         alert("No resume state found.");
+         return;
+      }
+
+      const { romName, romData, emulatorState, cheats, controls }: ResumeState =
+         JSON.parse(savedState);
+
+      currentRomName = romName;
+      currentRomData = new Uint8Array(Object.values(romData));
+      emulator.loadROM(currentRomData);
+      emulator.loadState(new Uint8Array(Object.values(emulatorState)));
+
+      if (cheats) {
+         cheats.forEach((cheat) => {
+            emulator.addCheat(cheat.code, cheat.enabled);
+         });
+      }
+
+      if (controls) {
+         Object.assign(controls, controls);
+      }
+
+      alert("Game resumed successfully!");
+   };
+
+   const initializeEmulator = (romData: ArrayBuffer) => {
+      currentRomName = "Game Title";
+      currentRomData = romData;
+      emulator.loadROM(romData);
    };
  </script>
  
@@ -102,6 +152,8 @@
     onStart={startEmulator}
     onPause={pauseEmulator}
     onReset={resetEmulator}
+    onSaveResumeState={saveResumeState}
+    onResume={loadResumeState}
     onSaveState={saveState}
     onLoadState={loadState}/>
     <h2>Control Settings</h2>
